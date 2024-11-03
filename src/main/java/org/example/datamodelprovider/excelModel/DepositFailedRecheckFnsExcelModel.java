@@ -1,7 +1,7 @@
 package org.example.datamodelprovider.excelModel;
 
 import lombok.*;
-import org.example.datamodelprovider.annotation.ExcelPresenter;
+import org.example.datamodelprovider.annotation.ExcelColumnPresenter;
 import org.example.datamodelprovider.excelData.ExcelDataModel.ExcelDataModel;
 
 @Builder
@@ -9,10 +9,10 @@ import org.example.datamodelprovider.excelData.ExcelDataModel.ExcelDataModel;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DepositExcelModel extends ExcelDataModel {
+public class DepositFailedRecheckFnsExcelModel extends ExcelDataModel {
 
-    @ExcelPresenter(name = "Номер заявки")
+    @ExcelColumnPresenter(name = "Номер заявки")
     private Long requestId;
-    @ExcelPresenter(name = "Email")
+    @ExcelColumnPresenter(name = "Email")
     private String email;
 }

@@ -10,13 +10,12 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.apache.poi.ss.usermodel.BorderStyle.THIN;
-import static org.apache.poi.ss.usermodel.IndexedColors.LIGHT_TURQUOISE1;
 import static org.apache.poi.ss.usermodel.IndexedColors.LIGHT_YELLOW;
 
 @Component
 public class ExcelWriterService {
 
-    public  <T extends ExcelDataModel> void writeDataToExcel(String filePath, String sheetName, T data) throws IOException {
+    public <T extends ExcelDataModel> void writeDataToExcel(String filePath, String sheetName, T data) throws IOException {
         if (data == null) {
             throw new IllegalArgumentException("Данные не должны быть null");
         }
@@ -113,7 +112,7 @@ public class ExcelWriterService {
                 Cell cell = row.createCell(i - 1);
                 CellStyle styleToBody = createStyleToBody(workbook);    //Стиль для данных
                 cell.setCellStyle(styleToBody);
-                Object value = obj.getValue(i); // Получаем значение по индексу
+                Object value = obj.getFiledValue(i); // Получаем значение по индексу
 
                 if (value instanceof Number) {
                     cell.setCellValue(((Number) value).doubleValue());

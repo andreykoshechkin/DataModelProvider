@@ -1,6 +1,6 @@
 package org.example.datamodelprovider.excelData.ExcelDataModel;
 
-import org.example.datamodelprovider.annotation.ExcelPresenter;
+import org.example.datamodelprovider.annotation.ExcelColumnPresenter;
 
 import java.lang.reflect.*;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.util.List;
 public abstract class ExcelDataModel {
 
     // Метод для получения значения по индексу
-    public Object getValue(int index) {
+    public Object getFiledValue(int index) {
         Field[] fields = this.getClass().getDeclaredFields();
 
         Field field = fields[index - 1]; // Индекс начинается с 1, поэтому вычитаем 1
@@ -24,8 +24,8 @@ public abstract class ExcelDataModel {
     public List<String> getColumnNames() {
         Field[] fields = this.getClass().getDeclaredFields();
         return Arrays.stream(fields)
-                .filter(it -> it.isAnnotationPresent(ExcelPresenter.class))
-                .map(field -> field.getAnnotation(ExcelPresenter.class).name())
+                .filter(it -> it.isAnnotationPresent(ExcelColumnPresenter.class))
+                .map(field -> field.getAnnotation(ExcelColumnPresenter.class).name())
                 .toList();
 
     }

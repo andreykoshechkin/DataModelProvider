@@ -1,7 +1,7 @@
 package org.example.datamodelprovider.sheduled;
 
 import lombok.RequiredArgsConstructor;
-import org.example.datamodelprovider.service.ExcelExportService;
+import org.example.datamodelprovider.service.DepositRecheckClientFnsService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CreateExcelScheduled {
 
-    private final ExcelExportService excelExportService;
+    private final DepositRecheckClientFnsService excelExportService;
 
 
     @Scheduled(cron = "0 */1 * * * *")

@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @ToString
 @AllArgsConstructor
-public class ExcelDataProjection {
+public class CandidateRecheckFnsServiceProjection {
 
     private Long id;
     private String email;
