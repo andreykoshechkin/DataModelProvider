@@ -1,28 +1,30 @@
 package org.example.datamodelprovider.service;
 
+import io.vavr.control.Try;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.datamodelprovider.excelData.ExcelDataModel.ExcelDataModel;
 import org.springframework.stereotype.Component;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 import static org.apache.poi.ss.usermodel.BorderStyle.THIN;
-import static org.apache.poi.ss.usermodel.IndexedColors.LIGHT_YELLOW;
+import static org.apache.poi.ss.usermodel.IndexedColors.*;
 
+@Slf4j
 @Component
 public class ExcelWriterService {
 
-    public <T extends ExcelDataModel> void writeDataToExcel(String filePath, String sheetName, T data) throws IOException {
+    public <T extends ExcelDataModel> void writeDataToExcel(String filePath, String sheetName, T data) {
         if (data == null) {
             throw new IllegalArgumentException("Данные не должны быть null");
         }
         writeDataToExcel(filePath, sheetName, List.of(data));
     }
 
-    public <T extends ExcelDataModel> void writeDataToExcel(String filePath, String sheetName, List<T> data) throws IOException {
+    public <T extends ExcelDataModel> void writeDataToExcel(String filePath, String sheetName, List<T> data) {
         if (data == null) {
             throw new IllegalArgumentException("Данные не должны быть null");
         }
@@ -54,23 +56,21 @@ public class ExcelWriterService {
             sheet.autoSizeColumn(i);
         }
 
-        // Сохраняем файл по указанному пути
-        try (FileOutputStream fileOutputStream = new FileOutputStream(getFilePath(filePath, sheetName))) {
-            workbook.write(fileOutputStream);
-        } finally {
-            workbook.close();
-        }
-    }
-
-    private String getFilePath(String filePath, String sheetName) {
-        return filePath + "\\" + sheetName + ".xlsx"; // Правильный способ добавления обратного слэша
+        String fullPath = createFullPath(filePath, sheetName);
+        Try.withResources(() -> new FileOutputStream(fullPath))
+                .of(fileOutputStream -> {
+                    workbook.write(fileOutputStream);
+                    return fileOutputStream;
+                })
+                .onFailure(e -> log.error("Ошибка при записи данных: {}", e.getMessage()))
+                .andFinallyTry(workbook::close);
     }
 
     private static CellStyle createStyleToHeader(Workbook workbook) {
         CellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setAlignment(HorizontalAlignment.CENTER);
         headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        headerStyle.setFillForegroundColor(LIGHT_YELLOW.getIndex());
+        headerStyle.setFillForegroundColor(LAVENDER.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         headerStyle.setWrapText(true);
 
@@ -91,18 +91,17 @@ public class ExcelWriterService {
 
     private static CellStyle createStyleToBody(Workbook workbook) {
         // Создаем стиль для данных с границами
-        CellStyle dataStyle = workbook.createCellStyle();
-        dataStyle.setAlignment(HorizontalAlignment.CENTER);
-        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        CellStyle bodyStyle = workbook.createCellStyle();
+        bodyStyle.setAlignment(HorizontalAlignment.CENTER);
+        bodyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
         // Настройка границ для данных
-        dataStyle.setBorderTop(THIN);
-        dataStyle.setBorderBottom(THIN);
-        dataStyle.setBorderLeft(THIN);
-        dataStyle.setBorderRight(THIN);
-        return dataStyle;
+        bodyStyle.setBorderTop(THIN);
+        bodyStyle.setBorderBottom(THIN);
+        bodyStyle.setBorderLeft(THIN);
+        bodyStyle.setBorderRight(THIN);
+        return bodyStyle;
     }
-
 
     private <T extends ExcelDataModel> void setDataInRow(List<T> data, Sheet sheet, int rowCount, int columnCount, Workbook workbook) {
         for (T obj : data) {
@@ -112,16 +111,14 @@ public class ExcelWriterService {
                 Cell cell = row.createCell(i - 1);
                 CellStyle styleToBody = createStyleToBody(workbook);    //Стиль для данных
                 cell.setCellStyle(styleToBody);
+                cell.getRow().setHeight((short) (10 * 45));
                 Object value = obj.getFiledValue(i); // Получаем значение по индексу
-
-                if (value instanceof Number) {
-                    cell.setCellValue(((Number) value).doubleValue());
-                } else if (value instanceof Boolean) {
-                    cell.setCellValue((Boolean) value);
-                } else {
-                    cell.setCellValue(value != null ? value.toString() : "");
-                }
+                cell.setCellValue(value.toString());
             }
         }
+    }
+
+    private String createFullPath(String filePath, String sheetName) {
+        return filePath + "\\" + sheetName + ".xlsx";
     }
 }
